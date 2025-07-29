@@ -26,10 +26,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract version from pyproject.toml
+      - name: Extract version from package.json
         id: project_version
         run: |
-          VERSION=$(sed -n '/^\[project\]/,/^\[/p' pyproject.toml | grep '^version =' | sed -E 's/version = "([^"]+)"/\1/')
+          VERSION=$(node -p "require('./src/imaging-plaza-webapp/package.json').version")
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
