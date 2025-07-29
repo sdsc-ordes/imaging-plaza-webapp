@@ -1,0 +1,15 @@
+{
+   "title":"New software",
+   "validate_button":"Validate",
+   "modal_title":"Congratulations",
+   "modal_text_1":"You have filled in the basic information about the software !",
+   "modal_text_2":"Our team will now validate your software before publishing it on the site. This usually takes 2 to 5 days, you will receive an email to notify you.",
+   "modal_text_3":"You can now add additional information about your software by going to the new sections on the next page (e.g. overview).",
+   "modal_text_4":"The more fields you fill in, the higher your FAIR level will be. The FAIR Level is an indicator from 1 to 5 that shows how a software follows good practices. ",
+   "modal_text_5":"You can learn more about the FAIR level by ",
+   "modal_link":"clicking here.",
+   "modal_button":"I understand",
+   
+   "no.thanks": "No thanks",
+   "yes.please": "Yes please!"
+}

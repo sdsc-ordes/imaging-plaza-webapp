@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin(){
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isAuthenticated(){
+      return request.auth.uid != null;
+    }
+    match /configuration/{document=**} {
+      allow read;
+      allow read, write: if isAdmin();
+    }
+    match /software/{document} {
+      function isSoftwarePublished(){
+        return resource.data.status == 'published';
+      }
+      function isSoftwareOwner(){
+        return resource.data.firebaseUserId == request.auth.uid;
+      }
+      allow read: if isSoftwarePublished() || isSoftwareOwner() || isAdmin();
+      allow update: if isSoftwareOwner();
+      allow create: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /contactForm/{document=**} {
+      allow create;
+      allow read, write: if isAdmin();
+    }
+    match /faqData/{document=**} {
+      allow read;
+      allow write: if isAdmin();
+    }
+    match /teamMember/{document=**} {
+      allow read;
+      allow write: if isAdmin();
+    }
+    match /users/{userId} {
+      allow create;
+      allow read, update: if request.auth.uid == userId;
+      allow read, write: if isAdmin();
+    }
+  }
+}

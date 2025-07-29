@@ -1,0 +1,15 @@
+{
+  "name": "Manager",
+  "table_software_name_label": "Name",
+  "table_edit_button": "Edit",
+  "status_update_success": "Status has been updated!",
+  "table_created_at_label": "Creation",
+  "table_updated_at_label": "Last update",
+  "table_status_label": "Status",
+  "table_no_rows": "No rows",
+  "table_filter_pending": "Display only pending",
+  "popover_delete_message":"Are you sure you want to delete {{name}} ?",
+  "status_delete_success":"{{name}} has been deleted.",
+  "delete_button":"Delete",
+  "popover_delete_title": "Please confirm deletion"
+}

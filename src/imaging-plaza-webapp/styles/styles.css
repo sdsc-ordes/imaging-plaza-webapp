@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.faqPar:not(:last-child) {
+  padding-bottom: 1rem;
+}
+
+.faqPar > a {
+  text-decoration: underline;
+  color: #00b880;
+}
+
+.faqList {
+  list-style: inside;
+}
+
+.faqList:is(ol) > li {
+  list-style-type: list-item;
+}
+
+.faqList:not(:last-child) {
+  padding-bottom: 1rem;
+}
+
+.faqPar > img {
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.faqIntraList {
+  list-style-type: disc; /* Adds dots as bullet points */
+  margin-left: 20px; /* Adds space between the bullets and the content */
+  font-size: 16px; /* Adjusts font size */
+  color: #333; /* Changes text color */
+  line-height: 1.5; /* Improves readability by adjusting line height */
+}
+
+@media only screen and (max-width: 768px) {
+  .faqPar > img {
+    max-width: 100%;
+  }
+}
+
+.software-details-illustatrion-image {
+  border-radius: 10px;
+}

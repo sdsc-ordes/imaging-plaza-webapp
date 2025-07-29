@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "staging": "swiss-data-website-dev-76736",
+    "prod": "swiss-data-website-prod",
+    "default": "swiss-data-website-dev-76736"
+  }
+}

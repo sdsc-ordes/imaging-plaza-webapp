@@ -1,0 +1,58 @@
+# Run dev related files
+robots.txt
+sitemap*.xml
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+*.env.local
+.env
+.env.building
+env.local
+.next
+
+# dependencies
+node_modules
+/.pnp
+.pnp.js
+.pnpm-debug.log
+
+# testing
+/coverage
+
+# production
+/build
+/out
+
+# misc
+.DS_Store
+.env.development.local
+.env.test.local
+.env.production.local
+/config/.env.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.firebase
+/.idea
+firebase-debug.log
+
+/.eslintcache
+.next
+ui-debug.log
+public/uploads
+#.npmrc
+
+.vercel
+
+/firebase-debug.log
+.firebase/*
+/ui-debug.log
+database-debug.log
+firestore-debug.log
+
+# sitemap
+/public/sitemap*
+/public/robots.txt
+config/.env.local
+next-env.d.ts

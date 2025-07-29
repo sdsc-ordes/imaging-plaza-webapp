@@ -1,0 +1,36 @@
+.searchBar {
+  [class~='aa-Form'] {
+    border: 0;
+  }
+
+  [class~='aa-Form']:focus-within {
+    box-shadow: none;
+  }
+
+  [class~='aa-InputWrapperPrefix'],
+  [class~='aa-InputWrapperSuffix'] {
+    display: none;
+  }
+
+  [class~='aa-Input'] {
+    font-weight: bold;
+    font-size: 21px;
+    padding: 16px 16px 16px 0px;
+    letter-spacing: 0.5px;
+    color: #878787;
+  }
+}
+
+.searchPanel {
+  height: content-box !important;
+
+  [class~='aa-Panel'] {
+    padding: 0;
+    margin: 0;
+    display: contents !important;
+  }
+
+  [class~='aa-PanelLayout'] {
+    padding: 0;
+  }
+}

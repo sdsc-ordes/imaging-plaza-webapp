@@ -1,0 +1,18 @@
+{
+  "results_number": "{{count}} results",
+  "sort_by": "Sort by",
+  "sort_name": "Name",
+  "sort_date": "Last modified",
+  "sort_fair_level": "Fair Level",
+  "sort_button_label": "Sort",
+  "filter_button_label": "Filters",
+  "filter_apply_filters": "Apply filters",
+  "bar_search": "Search",
+  "bar_placeholder": "#Grayscale  #learning-based  Animals",
+  "bar_placeholder_home": "What are you looking for?",
+  "bar_sort_ascending": "Ascending",
+  "bar_sort_descending": "Descending",
+  "empty_results": "Oops ! There are no results matching your search, change your search or filters",
+  "meta_title": "Search among hundreds of imaging softwares - Imaging Plaza",
+  "meta_description": "Search among hundreds of imaging softwares and find the best one for your project. Filter by programming language, categories and much more."
+}

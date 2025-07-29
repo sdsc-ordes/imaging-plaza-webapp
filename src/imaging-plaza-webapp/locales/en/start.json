@@ -1,0 +1,14 @@
+{
+    "title_start":"New software",
+    "title_info":"Informations",
+    "start_button":"Start",
+    "start_anyway_button":"Start anyway",
+    "back_button_aria":"Back",
+    "text_info_1": "You are about to add new software to the platform.",
+    "text_info_2": "To start, insert the github or gitlab URL to your repository, and fill in the form on the following page. When you click on \"Publish\", your software will be visible to all users.",
+    "gimie.description": "We use <link>Gimie</link> to prefill the form based on your git repository",
+   "gimie.repository": "Repository",
+   "gimie.placeholder": "https://github.com/SDSC-ORD/gimie",
+   "gimie.existing-repo": "Repo already exists in our system",
+   "gimie.failure": "Gimie couldn't fetch your repository"
+}

@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "incremental": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@coteries/*": ["./lib/@coteries/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "./playground",
+    "lib/@coteries/**"
+  ],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "custom.d.ts",
+    "next-env.d.ts",
+  ]
+}

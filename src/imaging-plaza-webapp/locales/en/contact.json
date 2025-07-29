@@ -1,0 +1,19 @@
+{
+  "the_imaging_plaza": "The Imaging Plaza",
+  "tel": "+41 21 693 43 88",
+  "mail": "imaging_repository_contact@groupes.epfl.ch",
+  "building": "INN Building, Station 14, 1015 Lausanne",
+  "form_name_placeholder": "Name",
+  "form_email_placeholder": "Email",
+  "form_subject_placeholder": "Subject",
+  "form_message_placeholder": "Message",
+  "form_send": "Send",
+  "title": "Contact us",
+  "tab_title": "The software is produced by {0}",
+  "tab_message": "In case of question or request, please contact:",
+  "contact_form_required_field": "This field is required",
+  "contact_form_email_error": "This is not a correct email",
+  "contact_form_success": "Your message was successfully sent, the support team will contact you as soon as possible",
+  "meta_title":"Get in touch with us - Imaging Plaza",
+  "meta_description":"Contact us at Imaging Plaza and we'll answer your questions on our platform or other reproducible research topics."
+}
