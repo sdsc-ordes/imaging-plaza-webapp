@@ -8,13 +8,17 @@ The easier way to execute this repository is to use Docker.
 docker build -f tools/image/Dockerfile -t imaging-plaza-webapp .
 ```
 
-Now in order to run the tool please fill `./config/.env.local` file, and run: 
+Now in order to run the tool please fill `.env` file from `.env.dist`, and run: 
 
 ``` bash
 docker run --env-file .env -p 80:3000 imaging-plaza-webapp
 ```
 
-This command will run `entrypoint.sh` in order to build the react app and start serving the web. 
+This command will run `entrypoint.sh` in order to build the react app and start serving the web in production. 
+
+## How to develop?
+
+Please run `bash run_development.sh`. This will mount the src volume into the app and run `npm run dev`. All changes in the project will be detected by the app.
 
 ## Changelog
 
