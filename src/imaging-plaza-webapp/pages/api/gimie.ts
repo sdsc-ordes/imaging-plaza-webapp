@@ -4,14 +4,11 @@ import {TypedFetch} from '@coteries/utils/api-utils'
 import {z} from 'zod'
 import {SchemaSoftwareSourceCode} from '../../components/Form/schema'
 import {GimiePayload} from '../../models/GimiePayload'
-import {RootTriplet} from '../../models/Triplet'
 import {AuthHandler} from '../../server/handler'
-import {tripletsToSoftware} from '../../utils/software/tripletsToSoftware'
 
 
 /**
  * Retrieve gimie fields
- * #INSERT_PREFILL_1: copy
  */
 
 export default AuthHandler.post(SchemaSoftwareSourceCode.partial(), GimiePayload, async req => {
@@ -25,19 +22,15 @@ export default AuthHandler.post(SchemaSoftwareSourceCode.partial(), GimiePayload
   const response = await TypedFetch.get(url, {
     parser: z.object({
       link: z.string(),
-      output: z.string()
+      output: SchemaSoftwareSourceCode.deepPartial()
     }),
   })
 
-  const result = RootTriplet.array().parse(JSON.parse(response.output))
-  console.debug("Gimie.ts result by gimie", result)
-
-  const schema = tripletsToSoftware(result)
-  console.debug("Gimie.ts schema by gimie", schema)
-
+  const schema = response.output
 
   // Quick solution for the name
-  schema['schema:name'] = (schema['schema:name'] ?? '').split('/').pop();
+  // This should be in the MS
+  schema['schema:name'] = (schema['schema:name'] ?? '').split('/').pop() ?? '';
 
   return schema
 })
