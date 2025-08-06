@@ -75,21 +75,54 @@ export const postFinalSchema = async (schema: SchemaSoftwareSourceCode) => {
 }
 
 export const inferFairLevel = async (schema: Partial<SchemaSoftwareSourceCode>) => {
-  const payload = { data: addContext(schema) }
-  const response = await TypedFetch.post(INFER_URL, payload, {
-    parser: z.object({
-      jsonldOutput: RootTriplet.array(),
-    }),
-    headers: AuthorizationHeaders,
+  // Convert the schema to JSON-LD format
+  const jsonldData = JSON.stringify(addContext(schema))
+  
+  // Create FormData for multipart/form-data request
+  const formData = new FormData()
+  
+  // Use Blob instead of File for better Node.js compatibility
+  const blob = new Blob([jsonldData], { type: 'application/ld+json' })
+  formData.append('data', blob, 'data.jsonld')
+
+  const response = await fetch(INFER_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/ld+json', // Explicitly set the Accept header
+    },
+    body: formData,
   })
-  const element: RootTriplet = response.jsonldOutput[0]
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('Inference API error:', errorText)
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+  }
+
+  // Since the response is a file with JSON-LD content, parse it as JSON directly
+  const result = await response.json()
+  console.log('Raw response from inference API:', JSON.stringify(result, null, 2))
+  
+  // The result should already be the JSON-LD array, not wrapped in an object
+  // So we parse it directly as RootTriplet array
+  const parsedResponse = RootTriplet.array().parse(result)
+  console.log('Parsed response:', JSON.stringify(parsedResponse, null, 2))
+
+  const element: RootTriplet = parsedResponse[0]
+  console.log('First element:', JSON.stringify(element, null, 2))
+  
   const obj = omit(element, '@id')
+  console.log('Object without @id:', JSON.stringify(obj, null, 2))
+  
   const values = Object.values(obj)[0]
+  console.log('Values:', JSON.stringify(values, null, 2))
+  
   const fairLevelStr = values.reduce(
     (acc, a) => (acc.localeCompare(a['@value'] ?? '') > 0 ? acc : a['@value']!),
     ''
   )
 
+  console.log('Final fair level string:', fairLevelStr)
   return fairLevelStr
 }
 
