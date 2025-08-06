@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2025-08-06
+
+### Added 
+- Compatibility with shacl-api MS for infer fair scoring
+- Better logging when saving draft on server side
+
 ## [1.7.0] - 2025-07-29
 
 ### Added
