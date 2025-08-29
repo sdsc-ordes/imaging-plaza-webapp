@@ -13,6 +13,13 @@ interface Props {
 }
 
 /**
+ * Adds zero-width spaces after forward slashes to allow line breaks
+ */
+const addBreaks = (text: string) => {
+  return text.replace(/\//g, '/\u200B')
+}
+
+/**
  * Author line
  */
 const AuthorInfoLine = ({software, noTags}: Props) => {
@@ -42,8 +49,12 @@ const AuthorInfoLine = ({software, noTags}: Props) => {
                 isExternal
                 href={software['schema:url'] ?? ''}
                 _hover={{color: theme.colors.brand.primary}}>
-                <Text variant='semiBold' as='span'>
-                  {softwareAuthors}{' '}
+                <Text 
+                  variant='semiBold' 
+                  wordBreak='break-word'
+                  style={{ whiteSpace: 'pre-wrap' }}
+                >
+                  {addBreaks(softwareAuthors)}{' '}
                   <ExternalLink width={12} height={12} style={{display: 'inline'}} />
                 </Text>
               </Link>
