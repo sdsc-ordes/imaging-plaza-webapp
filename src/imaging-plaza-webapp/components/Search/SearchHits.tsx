@@ -1,6 +1,7 @@
-import {Text, VStack, useBreakpoint} from '@chakra-ui/react'
+import {Text, VStack} from '@chakra-ui/react'
 import isEmpty from 'lodash/isEmpty'
 import useTranslation from 'next-translate/useTranslation'
+import {useIsDesktop} from '../../hooks/useIsDesktop'
 import Placeholder from '../Common/Placeholder'
 import HSoftwareCard from '../Common/SoftwareCard/HSoftwareCard'
 import VSoftwareCard from '../Common/SoftwareCard/VSoftwareCard'
@@ -14,7 +15,7 @@ type SearchHitsProps = {
  * How to display search result
  */
 const Hit = ({hit}: {hit: SchemaSoftwareSourceCode}) => {
-  const isDesktop = useBreakpoint('md')
+  const isDesktop = useIsDesktop()
 
   return isDesktop ? <HSoftwareCard software={hit} /> : <VSoftwareCard software={hit} />
 }
