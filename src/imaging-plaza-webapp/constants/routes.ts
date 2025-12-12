@@ -13,6 +13,7 @@ export const ROUTES_CONTACT = '/contact'
 export const ROUTES_TERMS = '/terms'
 export const ROUTES_PRIVACY = '/privacy'
 export const ROUTES_ONTOLOGY = '/ontology'
+export const ROUTES_DIDC = '/didc'
 
 export const ROUTES_ADD_SOFTWARE_START = '/software/add/start'
 export const ROUTES_ADD_SOFTWARE_OVERVIEW = '/software/add/overview'
