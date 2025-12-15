@@ -7,6 +7,7 @@ module.exports = {
     '/about': ['about'],
     'rgx:^/account': ['account', 'software'],
     '/contact': ['contact'],
+    '/didc': ['didc'],
     '/fair-level': ['fair-level'],
     '/faq': ['faq'],
     'rgx:^/manager': ['manager', 'software'],
