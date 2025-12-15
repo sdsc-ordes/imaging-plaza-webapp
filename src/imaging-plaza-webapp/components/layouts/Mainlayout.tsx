@@ -19,7 +19,7 @@ interface Props {
 }
 
 // Some pages have smaller container (to make text easier to read)
-const SMALL_CONTAINER_PAGE = [ROUTES_ABOUT, ROUTES_FAQ, ROUTES_CONTACT]
+const SMALL_CONTAINER_PAGE = [ROUTES_ABOUT, ROUTES_CONTACT, ROUTES_FAQ]
 
 const MainLayout = ({restrictedType, children}: Props) => {
   const router = useRouter()

@@ -10,6 +10,7 @@ import {
   ROUTES_FAQ,
   ROUTES_HOME,
   ROUTES_SEARCH,
+  ROUTES_DIDC,
 } from '../../../constants/routes'
 
 interface Props {
@@ -37,10 +38,11 @@ const RenderItem = ({ link, name }: Props) => {
 const menuEntries = [
   { link: ROUTES_HOME, name: 'common:home' },
   { link: ROUTES_SEARCH(), name: 'common:search' },
-  { link: ROUTES_ABOUT, name: 'common:about' },
+  { link: ROUTES_DIDC, name: 'common:didc' },
 ]
 
 const menuGroup = [
+  { link: ROUTES_ABOUT, name: 'common:about' },
   { link: ROUTES_CONTACT, name: 'common:contact' },
   { link: ROUTES_FAQ, name: 'common:faq' },
   { link: EXTERNAL_ROUTE_ONTOLOGY, name: 'common:ontology' }

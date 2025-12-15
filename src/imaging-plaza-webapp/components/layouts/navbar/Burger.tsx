@@ -13,6 +13,7 @@ import {
   ROUTES_LOGIN,
   ROUTES_MANAGER,
   ROUTES_SEARCH,
+  ROUTES_DIDC,
 } from '../../../constants/routes'
 import {useAuth} from '../../../utils/AuthContext'
 
@@ -52,11 +53,12 @@ const Burger = () => {
         </MenuItem>
         <MenuItem onClick={() => push(ROUTES_HOME)}>{t('common:home')}</MenuItem>
         <MenuItem onClick={() => push(ROUTES_SEARCH())}>{t('common:search')}</MenuItem>
-        <MenuItem onClick={() => push(ROUTES_CONTACT)}>{t('common:contact')}</MenuItem>
+        <MenuItem onClick={() => push(ROUTES_DIDC)}>{t('common:didc')}</MenuItem>
         <MenuItem>
           <Divider />
         </MenuItem>
         <MenuItem onClick={() => push(ROUTES_ABOUT)}>{t('common:about')}</MenuItem>
+        <MenuItem onClick={() => push(ROUTES_CONTACT)}>{t('common:contact')}</MenuItem>
         <MenuItem onClick={() => push(ROUTES_FAQ)}>{t('common:faq')}</MenuItem>
       </MenuList>
     </Menu>

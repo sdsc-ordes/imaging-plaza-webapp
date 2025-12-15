@@ -36,5 +36,6 @@
   "fair_level_description":"Present on every software, the closer the FAIR level is to 5, the more confidence you can have.",
   "fair_level_button":"About FAIR levels",
   "profile": "Profile",
-  "results": "Result(s)"
+  "results": "Result(s)", 
+  "didc": "DIDC"
 }
