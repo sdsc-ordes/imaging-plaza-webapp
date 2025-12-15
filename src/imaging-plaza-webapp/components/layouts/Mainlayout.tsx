@@ -5,7 +5,6 @@ import {
   PROTECTED_ROUTE_MAPPING,
   ROUTES_ABOUT,
   ROUTES_CONTACT,
-  ROUTES_DIDC,
   ROUTES_FAQ,
   ROUTES_HOME,
 } from '../../constants/routes'
@@ -20,7 +19,7 @@ interface Props {
 }
 
 // Some pages have smaller container (to make text easier to read)
-const SMALL_CONTAINER_PAGE = [ROUTES_ABOUT, ROUTES_CONTACT, ROUTES_DIDC, ROUTES_FAQ]
+const SMALL_CONTAINER_PAGE = [ROUTES_ABOUT, ROUTES_CONTACT, ROUTES_FAQ]
 
 const MainLayout = ({restrictedType, children}: Props) => {
   const router = useRouter()

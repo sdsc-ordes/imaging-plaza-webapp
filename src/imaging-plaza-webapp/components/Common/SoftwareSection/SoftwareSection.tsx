@@ -19,6 +19,7 @@ const SoftwareSection = ({softwareList, title}: Props) => {
   return (
     <Box
       w='100vw'
+      ml='calc(-50vw + 50%)'
       bgColor={theme.colors.brand.background}
       px={{base: 4, md: 14}}
       pt={{base: 12, md: 16}}
