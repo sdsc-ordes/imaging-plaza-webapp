@@ -6,6 +6,7 @@ import Head from 'next/head'
 import customTheme from '../styles/index'
 import '../styles/styles.css'
 import {AuthProvider} from '../utils/AuthContext'
+import {ErrorBoundary} from '../components/ErrorBoundary'
 
 function MyApp({Component, pageProps}: AppProps) {
   const {t} = useTranslation()
@@ -19,7 +20,9 @@ function MyApp({Component, pageProps}: AppProps) {
           <link href='/favicon.ico' />
           <title>{t('common:meta_title_default')}</title>
         </Head>
-        <Component {...pageProps} />
+        <ErrorBoundary>
+          <Component {...pageProps} />
+        </ErrorBoundary>
         <ToastContainer />
         <LibToastContainer />
       </ChakraProvider>
