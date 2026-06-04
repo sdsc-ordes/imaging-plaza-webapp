@@ -6,6 +6,7 @@ import { SchemaSoftwareSourceCode } from '../components/Form/schema'
 import { RootTriplet } from '../models/Triplet'
 import { tripletsToSoftware } from '../utils/software/tripletsToSoftware'
 import { Filter } from '@/models/Filter'
+import { validateIri } from '@/utils/sparql/validateIri'
 // import { OS_FILTERS } from '@/constants/softwareProperties'
 // import { resourceLimits } from 'worker_threads'
 
@@ -34,7 +35,9 @@ const final = {
   context: 'https://imaging-plaza.epfl.ch/finalGraph',
 }
 
-const getQuery = (repo: string) => `
+const getQuery = (repo: string) => {
+  const safeRepo = validateIri('repository', repo)
+  return `
 PREFIX : <https://imaging-plaza.epfl.ch/>
 CONSTRUCT {
   ?subject :graph ?g .
@@ -45,11 +48,12 @@ CONSTRUCT {
    GRAPH ?g{
      {
     {?subject ?predicate ?object .
-     filter(?subject = <${repo}> )
-    OPTIONAL { ?object ?p ?o . 
+     filter(?subject = <${safeRepo}> )
+    OPTIONAL { ?object ?p ?o .
       OPTIONAL {?o ?something ?else}}
-            }}}} 
+            }}}}
 `
+}
 export const postDraftSchema = async (schema: SchemaSoftwareSourceCode) => {
   const payload = {
     ...draft,
@@ -197,11 +201,14 @@ export const getSoftware = async (repository: string, allowDraft: boolean = true
 }
 
 
-export const deleteSoftQuery = async (graph: string, repository: string) => `DELETE
+export const deleteSoftQuery = async (graph: string, repository: string) => {
+  const safeGraph = validateIri('graph', graph)
+  const safeRepo = validateIri('repository', repository)
+  return `DELETE
 #delete all "DIRECT" triples of chosen subject
 {?s ?p ?o .
 #delete all triples used by object of chosen subject
-?o ?p2 ?o2. 
+?o ?p2 ?o2.
 #delete all triples used by predicate of chosen subject
 ?p ?p3 ?o3.
 #delete all triples used by object of object of chosen subject (2 layers deep)
@@ -211,8 +218,8 @@ export const deleteSoftQuery = async (graph: string, repository: string) => `DEL
 }
 
 WHERE {
-   GRAPH <${graph}>
- {VALUES (?s) {(<${repository}>)}
+   GRAPH <${safeGraph}>
+ {VALUES (?s) {(<${safeRepo}>)}
  #Direct triples
        ?s ?p ?o.
  #triples used by object of chosen subject      
@@ -228,9 +235,10 @@ WHERE {
           #unless predicate is used elsewhere            
           FILTER NOT EXISTS {?X ?p ?Y. 
           FILTER (?X != ?s)}}
-             
+
        }}`
-// export const deleteSoftQuery = async (graph: string, repository: string) => `DELETE 
+}
+// export const deleteSoftQuery = async (graph: string, repository: string) => `DELETE
 // {?s ?p ?o .
 // ?o ?p2 ?o2. 
 // ?p ?p3 ?o3.}
