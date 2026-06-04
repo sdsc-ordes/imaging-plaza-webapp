@@ -36,7 +36,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /users/{userId} {
-      allow create;
+      allow create: if request.auth.uid == userId;
       allow read, update: if request.auth.uid == userId;
       allow read, write: if isAdmin();
     }
