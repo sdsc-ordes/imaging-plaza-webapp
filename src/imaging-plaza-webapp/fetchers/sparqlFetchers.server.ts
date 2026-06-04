@@ -7,6 +7,7 @@ import { RootTriplet } from '../models/Triplet'
 import { tripletsToSoftware } from '../utils/software/tripletsToSoftware'
 import { Filter } from '@/models/Filter'
 import { validateIri } from '@/utils/sparql/validateIri'
+import { fetchTimeout, INDEX_REBUILD_TIMEOUT_MS } from '@/utils/fetch/timeouts'
 // import { OS_FILTERS } from '@/constants/softwareProperties'
 // import { resourceLimits } from 'worker_threads'
 
@@ -62,6 +63,7 @@ export const postDraftSchema = async (schema: SchemaSoftwareSourceCode) => {
 
   return TypedFetch.post(POST_URL, payload, {
     headers: AuthorizationHeaders,
+    signal: fetchTimeout(),
   })
 }
 
@@ -74,6 +76,7 @@ export const postFinalSchema = async (schema: SchemaSoftwareSourceCode) => {
     },
     {
       headers: AuthorizationHeaders,
+      signal: fetchTimeout(),
     }
   )
 }
@@ -85,6 +88,7 @@ export const inferFairLevel = async (schema: Partial<SchemaSoftwareSourceCode>) 
       jsonldOutput: RootTriplet.array(),
     }),
     headers: AuthorizationHeaders,
+    signal: fetchTimeout(),
   })
   const element: RootTriplet = response.jsonldOutput[0]
   const obj = omit(element, '@id')
@@ -126,7 +130,8 @@ export const searchSoftwares = async (search?: string, filters?: Filter[]) => {
   const result = await TypedFetch.post(SEARCH_URL, body, {
     parser: SearchSoftwareResult,
     headers: { ...AuthorizationHeaders, Accept: 'application/json' },
-  })  
+    signal: fetchTimeout(),
+  })
 
   const softwares = await Promise.all(
     result.results.bindings.flatMap(b => result.head.vars.map(s => getSoftware(b[s].value)))
@@ -188,6 +193,7 @@ export const getSoftware = async (repository: string, allowDraft: boolean = true
     const result = await TypedFetch.get(GET_URL + '?' + URLParams.toString(), {
       parser: RootTriplet.array(),
       headers: { ...AuthorizationHeaders, Accept: 'application/ld+json' },
+      signal: fetchTimeout(),
     })
 
     convertAndReplaceFields(result, conversionSpecs);
@@ -278,7 +284,8 @@ export const deleteSoftware = async (graph: string, repository: string) => {
         ...AuthorizationHeaders,
         //'Accept': 'application/json'
         'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      },
+      signal: fetchTimeout(),
     });
 
     if (!response.ok) {
@@ -304,6 +311,7 @@ export const rebuildIndex = async () => {
       headers: {
         ...AuthorizationHeaders,
       },
+      signal: fetchTimeout(INDEX_REBUILD_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -346,6 +354,7 @@ export const makeKeywords = async () => {
       headers: {
         ...AuthorizationHeaders,
       },
+      signal: fetchTimeout(),
     });
     if (!response.ok) {
       throw new Error('Network response was not ok');
