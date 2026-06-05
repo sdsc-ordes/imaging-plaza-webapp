@@ -1,0 +1,50 @@
+# imaging-plaza-webapp
+#
+# Runs the webapp on a shared Docker network so it talks to the other
+# imaging-plaza services via internal DNS instead of bouncing through
+# the public hostname.
+#
+# One-time setup on a host that hosts the rest of the stack:
+#
+#   docker network create imaging-plaza-net
+#
+# Each peer service must join that network (e.g. add
+# `--network imaging-plaza-net --network-alias <name>` to its `docker run`
+# in /imaging-plaza/all_up.sh). The aliases below assume:
+#
+#   graphdb                    -> GraphDB         (container port 7200)
+#   fair-indicator             -> FAIR indicator  (container port 15400)
+#   shacl-api                  -> SHACL/inference (container port 8000)
+#   git-metadata-extractor     -> Gimie wrapper   (container port 1234)
+#   imaging-plaza-search       -> Search          (container port 15400)
+#
+# Bring up just the webapp:
+#
+#   docker compose --env-file .env up -d
+
+services:
+  webapp:
+    image: ghcr.io/sdsc-ordes/imaging-plaza-webapp:develop
+    container_name: imaging-plaza-webapp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Override the public URLs from .env so all upstream calls stay
+      # on the internal Docker network. .env still supplies IP_AUTH and
+      # the Firebase credentials.
+      IP_DB_URL: http://graphdb:7200
+      IP_GIMIE_URL: http://git-metadata-extractor:1234/v1/extract/json
+      IP_INFERENCE_URL: http://shacl-api:8000/infer
+      IP_FAIR_LEVEL_INDICATOR: http://fair-indicator:15400/indicate
+      IP_SEARCH_URL: http://imaging-plaza-search:15400/v1/search
+    networks:
+      - imaging-plaza-net
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  imaging-plaza-net:
+    external: true
