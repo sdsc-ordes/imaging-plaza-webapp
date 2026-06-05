@@ -167,13 +167,57 @@ and reinstating the deleted `utils/firebase/` files — practical if done
 within a release window, costly if user accounts have been created in
 Supabase.
 
+## Email delivery (decided 2026-06-05)
+
+GoTrue sends transactional email for signup confirmation, password reset,
+magic link, and invites. We use **Mailgun, EU region** in every
+environment, plus a Mailpit sidecar in dev for offline testing.
+
+**Why Mailgun EU and not SendGrid free:** EU data residency matches the
+EPFL profile; SendGrid's free tier is US-only. Volume is on the order of
+a few dozen mails/month, so Mailgun's pay-as-you-go ($0.80 / 1000 mails)
+is effectively free at this scale.
+
+### What ops needs to do once
+
+1. Sign up at mailgun.com and switch the account to the EU region.
+2. Add a sending domain — recommend a subdomain like
+   `mg.imaging-plaza.epfl.ch` so the parent domain's reputation is
+   unaffected by transactional traffic.
+3. Ask EPFL IT to publish the four DNS records Mailgun prints (one TXT
+   for SPF, two TXTs for DKIM, one CNAME for tracking) and a single MX
+   for inbound bounces.
+4. From the Mailgun panel, copy the SMTP credentials of the new domain
+   into `/imaging-plaza/supabase/.env`:
+
+```env
+GOTRUE_SMTP_HOST=smtp.eu.mailgun.org
+GOTRUE_SMTP_PORT=587
+GOTRUE_SMTP_USER=postmaster@mg.imaging-plaza.epfl.ch
+GOTRUE_SMTP_PASS=<paste from Mailgun panel>
+GOTRUE_SMTP_ADMIN_EMAIL=noreply@imaging-plaza.epfl.ch
+GOTRUE_SMTP_SENDER_NAME=Imaging Plaza
+```
+
+### Dev / local testing
+
+Until the DNS records are live, GoTrue points at a **Mailpit** container
+in the Supabase compose. Captured mail is browsable at
+`http://imagingplazadev.epfl.ch:8025` and never leaves the host:
+
+```env
+GOTRUE_SMTP_HOST=mailpit
+GOTRUE_SMTP_PORT=1025
+GOTRUE_SMTP_USER=
+GOTRUE_SMTP_PASS=
+```
+
+Swap to the Mailgun block above once the domain is verified.
+
 ## Open questions
 
 1. **OAuth redirect URLs.** GoTrue needs the public URL of the webapp to
    build callback URIs. In dev that is `http://imagingplazadev.epfl.ch:3000`;
    in prod that needs to be set per environment.
-2. **Email delivery.** GoTrue ships transactional emails (signup confirm,
-   password reset, magic link). We need an SMTP relay. EPFL's? Or
-   Mailgun/SendGrid for dev?
-3. **Admin bootstrap.** First admin user — created via SQL or via
+2. **Admin bootstrap.** First admin user — created via SQL or via
    Supabase Studio after the stack is up?
