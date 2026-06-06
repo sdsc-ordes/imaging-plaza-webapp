@@ -110,8 +110,8 @@ between phases — Firebase and Supabase coexist until phase 6.
 |---|-----------------------------------------------|----------------------------------------------------------------------------|
 | 0 | Land this plan + schema (this commit)         | `docs/migrations/`, `db/schema.sql`                                        |
 | 1 | ✅ Stand up Supabase locally + apply schema   | `/imaging-plaza/supabase/` (host, not this repo) + verify migrations apply |
-| 2 | Add Supabase client + server helpers          | `utils/supabase/`, `.env.dist`                                             |
-| 3 | New `AuthContext` reading Supabase session    | `utils/AuthContext.tsx`, parallel with existing Firebase one               |
+| 2 | ✅ Add Supabase client + server helpers       | `utils/supabase/`, `.env.dist`                                             |
+| 3 | ✅ New `AuthContext` reading Supabase session | `utils/SupabaseAuthContext.tsx`, parallel with existing Firebase one       |
 | 4 | Rewrite the four `/account/*` pages           | `pages/account/{login,create,setup,forgot-pw}.tsx`                         |
 | 5 | Swap `fetchers/auth.ts` and `userFetchers.ts` | profile reads/writes + bookmarks via `supabase.from('profiles')`           |
 | 6 | Swap server `AuthHandler`                     | `server/handler.ts` — verify Supabase access token instead of Firebase ID  |
