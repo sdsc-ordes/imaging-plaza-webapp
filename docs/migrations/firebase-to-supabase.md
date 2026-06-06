@@ -109,7 +109,7 @@ between phases — Firebase and Supabase coexist until phase 6.
 | # | Phase                                         | Touches                                                                    |
 |---|-----------------------------------------------|----------------------------------------------------------------------------|
 | 0 | Land this plan + schema (this commit)         | `docs/migrations/`, `db/schema.sql`                                        |
-| 1 | Stand up Supabase locally + apply schema      | `/imaging-plaza/supabase/` (host, not this repo) + verify migrations apply |
+| 1 | ✅ Stand up Supabase locally + apply schema   | `/imaging-plaza/supabase/` (host, not this repo) + verify migrations apply |
 | 2 | Add Supabase client + server helpers          | `utils/supabase/`, `.env.dist`                                             |
 | 3 | New `AuthContext` reading Supabase session    | `utils/AuthContext.tsx`, parallel with existing Firebase one               |
 | 4 | Rewrite the four `/account/*` pages           | `pages/account/{login,create,setup,forgot-pw}.tsx`                         |
@@ -157,6 +157,54 @@ between phases — Firebase and Supabase coexist until phase 6.
 - `fetchers/sparqlFetchers.server.ts` — same
 - `utils/AuthContext.tsx` API surface — keep `{user, isLoading, login*, logout}`
   so consumers don't all need rewriting
+
+## Phase 1 status (completed 2026-06-06)
+
+The Supabase stack is up on the dev VM at `/imaging-plaza/supabase/`,
+joined to `imaging-plaza-net`. Three services:
+
+- `supabase-db-1` (`supabase/postgres:15.1.1.78`) — DB on internal 5432
+- `supabase-gotrue-1` (`supabase/gotrue:v2.151.0`) — auth on host 9999
+- `supabase-mailpit-1` (`axllent/mailpit:v1.20`) — fake SMTP, UI on host 8025
+
+Brought up with:
+
+```bash
+docker network create imaging-plaza-net   # if missing
+cd /imaging-plaza/supabase
+docker compose up -d
+./sync-roles.sh     # one-time: align internal role passwords to .env
+```
+
+`db/schema.sql` from this repo applied cleanly against the running DB:
+
+```bash
+docker run --rm --network imaging-plaza-net \
+  -e PGPASSWORD="$(grep ^POSTGRES_PASSWORD= /imaging-plaza/supabase/.env | cut -d= -f2-)" \
+  -v $PWD/db/schema.sql:/schema.sql:ro \
+  postgres:15-alpine \
+  psql -h supabase-db-1 -U supabase_admin -d postgres -f /schema.sql
+```
+
+End-to-end verified:
+
+- `POST /signup` to GoTrue returns a JWT and creates `auth.users` row.
+- `on_auth_user_created` trigger fires → `public.profiles` row with
+  `role=user`, empty bookmark arrays.
+- `POST /recover` sends the reset email; Mailpit captures it at
+  http://imagingplazadev.epfl.ch:8025 with `From: "Imaging Plaza" <noreply@...>`.
+
+### Quirk worth documenting
+
+`supabase/postgres:15.1.1.78` only honours `POSTGRES_PASSWORD` for the
+`supabase_admin` superuser. The other internal roles
+(`supabase_auth_admin`, `supabase_storage_admin`, `authenticator`,
+`supabase_replication_admin`) keep an opaque image-baked password, so
+every Supabase service that connects as one of them fails until they're
+synced. `sync-roles.sh` does that via `supabase_admin` (the one role
+that can `ALTER USER` reserved roles) and restarts GoTrue so it picks
+up the change. Run it once after `docker compose up -d` on a fresh
+stack; idempotent on reruns.
 
 ## Rollback
 
