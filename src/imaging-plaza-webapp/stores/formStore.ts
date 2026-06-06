@@ -1,8 +1,8 @@
 import {TypedFetch} from '@coteries/utils/api-utils'
-import {getAuth} from 'firebase/auth'
 import {create} from 'zustand'
 import {createJSONStorage, persist} from 'zustand/middleware'
 import {SchemaSoftwareSourceCode} from '../components/Form/schema'
+import {bearerHeader} from '../utils/supabase/accessToken'
 
 /**
  * Frontend management of the form and the values
@@ -46,7 +46,7 @@ export const useFormStore = create<FormStore>()(
             const data = await TypedFetch.get(`/api/softwares/get?${URLParams.toString()}`, {
               parser: SchemaSoftwareSourceCode,
               headers: {
-                'X-Firebase-AppCheck': (await getAuth().currentUser?.getIdToken()) ?? '',
+                Authorization: await bearerHeader(),
               },
             })
             const result = SchemaSoftwareSourceCode.safeParse(data)
@@ -77,7 +77,7 @@ export const useFormStore = create<FormStore>()(
           {
             parser: SchemaSoftwareSourceCode.partial(),
             headers: {
-              'X-Firebase-AppCheck': await getAuth().currentUser!.getIdToken(),
+              Authorization: await bearerHeader(),
             },
           }
         )
@@ -109,7 +109,7 @@ export const useFormStore = create<FormStore>()(
           {
             parser: SchemaSoftwareSourceCode.partial(),
             headers: {
-              'X-Firebase-AppCheck': await getAuth().currentUser!.getIdToken(),
+              Authorization: await bearerHeader(),
             },
           }
         )
@@ -133,7 +133,7 @@ export const useFormStore = create<FormStore>()(
               {
                 parser: SchemaSoftwareSourceCode,
                 headers: {
-                  'X-Firebase-AppCheck': await getAuth().currentUser!.getIdToken(),
+                  Authorization: await bearerHeader(),
                 },
               }
             )

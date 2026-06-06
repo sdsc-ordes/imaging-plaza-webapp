@@ -1,11 +1,11 @@
 import {omit} from '@coteries/utils'
 import {TypedFetch} from '@coteries/utils/api-utils'
-import {getAuth} from 'firebase/auth'
 import {PropsWithChildren, useEffect} from 'react'
 import {create} from 'zustand'
 import {SchemaSoftwareSourceCode} from '../components/Form/schema'
 import {subscribeToUserSoftwareListWithGraph} from '../fetchers/softwareFetchers'
 import {AuthUser, useAuth} from '../utils/AuthContext'
+import {bearerHeader} from '../utils/supabase/accessToken'
 
 export type UserStore = {
   ownSoftwares: SchemaSoftwareSourceCode[]
@@ -16,13 +16,11 @@ type PrivateUserStore = {
 }
 
 const getSoftwaresFromGraph = async (softs: string[]) => {
-  const token = await getAuth().currentUser!.getIdToken()
+  const authorization = await bearerHeader()
   const softwares = await Promise.all(
     softs.map(s =>
       TypedFetch.get<SchemaSoftwareSourceCode>(`/api/softwares/get?repository=${s}`, {
-        headers: {
-          'X-Firebase-AppCheck': token,
-        },
+        headers: {Authorization: authorization},
       }).catch(e => undefined)
     )
   )

@@ -26,7 +26,7 @@ import DetailsWithIcon from './Components/DetailsWithIcon'
 
 // PLace in stores
 import { TypedFetch } from '@coteries/utils/api-utils'
-import { getAuth } from 'firebase/auth'
+import { bearerHeader } from '../../../utils/supabase/accessToken'
 
 
 
@@ -61,14 +61,13 @@ const HSoftwareCard = ({ software, editable, showTag = false }: Props) => {
 
   const handleDelete = async (software: SchemaSoftwareSourceCode) => {
     try {
-      const token = await getAuth().currentUser!.getIdToken();
       const data = await TypedFetch.post(
         '/api/softwares/delete',
         software as SchemaSoftwareSourceCode,
         {
           parser: SchemaSoftwareSourceCode.partial(),
           headers: {
-            'X-Firebase-AppCheck': token,
+            Authorization: await bearerHeader(),
           },
         }
       )
