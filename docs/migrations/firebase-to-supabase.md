@@ -114,7 +114,7 @@ between phases — Firebase and Supabase coexist until phase 6.
 | 3 | ✅ New `AuthContext` reading Supabase session | `utils/SupabaseAuthContext.tsx`, parallel with existing Firebase one       |
 | 4 | ✅ Rewrite the four `/account/*` pages        | `pages/account/{login,create,setup,forgot-pw}.tsx` + AccountLogin children |
 | 5 | ✅ Swap `fetchers/auth.ts` and `userFetchers.ts` | profile reads/writes + bookmarks via `supabase.from('profiles')`         |
-| 6 | Swap server `AuthHandler`                     | `server/handler.ts` — verify Supabase access token instead of Firebase ID  |
+| 6 | ✅ Swap server `AuthHandler`                  | `server/handler.ts` — verify Supabase access token instead of Firebase ID  |
 | 7 | Replace `X-Firebase-AppCheck` header usage    | `stores/userStore.tsx`, `stores/formStore.ts`, `components/.../*Card.tsx`  |
 | 8 | Migrate `faq.server.ts`, `teamMembers.server` | server-side selects against Postgres                                       |
 | 9 | Migrate `contactFetchers.ts`                  | client insert via supabase, RLS allows anonymous insert                    |

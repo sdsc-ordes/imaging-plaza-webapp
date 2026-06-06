@@ -5,35 +5,38 @@ import {AuthHandler} from '../../../server/handler'
 export default AuthHandler.post(
   SchemaSoftwareSourceCode,
   SchemaSoftwareSourceCode,
-  async (req, {users}) => {
+  async (req, {supabaseAdmin}) => {
     const fairLevel = await inferFairLevel(req.payload as SchemaSoftwareSourceCode)
-    
+
     // Forcing deletion of temp graph when saving draft
-    const graph = "https://imaging-plaza.epfl.ch/temporaryGraph" as string
-    const software = {...req.payload, 'imag:fairLevel': fairLevel, "imag:graph": graph} as SchemaSoftwareSourceCode
+    const graph = 'https://imaging-plaza.epfl.ch/temporaryGraph' as string
+    const software = {
+      ...req.payload,
+      'imag:fairLevel': fairLevel,
+      'imag:graph': graph,
+    } as SchemaSoftwareSourceCode
 
+    const repo = req.payload['schema:codeRepository'][0] as string
+    await deleteSoftware(graph, repo)
 
-    //Delete the software
-    const repo = req.payload["schema:codeRepository"][0] as string
-    //const graph = req.payload["ex:graph"] as string
-
-    await deleteSoftware(graph, repo) 
-
-    // Previous CODE
     await postDraftSchema(software)
     await rebuildIndex()
-    const doc = users.doc(req.userId)
 
-    const user = (await doc.get()).data()!
     const mainRepository = software['schema:codeRepository'][0]
+    const {data: profile} = await supabaseAdmin
+      .from('profiles')
+      .select('own_softwares')
+      .eq('id', req.userId)
+      .single<{own_softwares: string[] | null}>()
+    const nextOwned = [
+      ...(profile?.own_softwares ?? []).filter(s => s !== mainRepository),
+      mainRepository,
+    ]
+    await supabaseAdmin
+      .from('profiles')
+      .update({own_softwares: nextOwned})
+      .eq('id', req.userId)
 
-    // #FIREBASE_EXAMPLE_BACKEND
-    await doc.update({
-      own_softwares: [
-        ...(user.own_softwares ?? []).filter(s => s !== mainRepository),
-        mainRepository,
-      ],
-    })
     return software
   }
 )
