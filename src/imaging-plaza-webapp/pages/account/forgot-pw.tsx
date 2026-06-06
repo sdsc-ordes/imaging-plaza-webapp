@@ -1,5 +1,5 @@
 import FormInput from '@/components/Form/components/FormInput'
-import {sendPasswordReset} from '@/fetchers/auth'
+import {getSupabaseClient} from '@/utils/supabase/client'
 import {emailRegex} from '@/utils/dataHandling/validators'
 import {Button, Flex, Heading, useBoolean} from '@chakra-ui/react'
 import {toast} from '@coteries/react/ui'
@@ -28,11 +28,11 @@ const Create = () => {
   } = useForm<FormData>({resolver: zodResolver(FormData)})
 
   const onSubmit = async (data: FormData) => {
+    setSending.on()
     try {
-      const {email} = data
-      setSending.on()
-      await sendPasswordReset(email)
-    } catch (e) {
+      // Mirror what the Firebase version did on error: still flash the
+      // confirmation toast so the form doesn't leak which emails exist.
+      await getSupabaseClient().auth.resetPasswordForEmail(data.email)
     } finally {
       setSending.off()
       toast.success(t('email_sent'), {duration: 5000})

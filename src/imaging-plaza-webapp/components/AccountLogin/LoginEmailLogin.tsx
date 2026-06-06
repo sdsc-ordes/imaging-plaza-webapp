@@ -4,9 +4,7 @@ import {useForm} from 'react-hook-form'
 import {emailRegex} from '../../utils/dataHandling/validators'
 import FormInput from '../Form/components/FormInput'
 import FormInputPassword from '../Form/components/FormPasswordInput'
-import handleError from '../../utils/dataHandling/handleError'
-import {fetchCheckEmailProvider} from '../../fetchers/auth'
-import {useAuth} from '../../utils/AuthContext'
+import {useSupabaseAuth} from '../../utils/SupabaseAuthContext'
 
 interface Props {
   onBack: () => void
@@ -20,7 +18,7 @@ interface FormData {
 const LoginEmailLogin = ({onBack}: Props) => {
   const {t} = useTranslation()
 
-  const {loginWithEmail} = useAuth()
+  const {loginWithEmail} = useSupabaseAuth()
 
   const {
     register,
@@ -28,14 +26,12 @@ const LoginEmailLogin = ({onBack}: Props) => {
     formState: {errors},
   } = useForm<FormData>()
 
+  // GoTrue intentionally does not expose "which provider did this email
+  // sign up with" the way Firebase did — checking would leak account
+  // existence. Just attempt the password login; the context surfaces
+  // an "invalid credentials" toast on failure.
   const onSubmit = async (data: FormData) => {
-    const provider = await fetchCheckEmailProvider(data.email)
-
-    if (provider !== 'password') {
-      handleError(null, t('account:login_error_provider'))
-    } else {
-      await loginWithEmail(data.email, data.password)
-    }
+    await loginWithEmail(data.email, data.password)
   }
 
   return (

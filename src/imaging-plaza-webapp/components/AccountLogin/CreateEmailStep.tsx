@@ -3,7 +3,7 @@ import useTranslation from 'next-translate/useTranslation'
 import {useForm} from 'react-hook-form'
 import {emailRegex} from '../../utils/dataHandling/validators'
 import FormInput from '../Form/components/FormInput'
-import {fetchCheckEmail} from '../../fetchers/auth'
+
 interface Props {
   onNext: (email: string) => void
 }
@@ -21,15 +21,11 @@ const CreateEmailStep = ({onNext}: Props) => {
     formState: {errors},
   } = useForm<FormData>()
 
+  // GoTrue does not expose an "is this email already registered" probe
+  // (intentionally, to avoid leaking account existence). The duplicate
+  // check happens at signup time in CreatePasswordStep instead.
   const onSubmit = async (data: FormData) => {
-    const {email} = data
-    console.info('User data successfully loaded', data);
-    const usedEmail = await fetchCheckEmail(email)
-    if (usedEmail) {
-      alert(t('account:create_account_error_exists'))
-    } else {
-      onNext(email)
-    }
+    onNext(data.email)
   }
 
   return (

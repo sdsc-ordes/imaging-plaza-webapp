@@ -3,13 +3,12 @@ import useTranslation from 'next-translate/useTranslation'
 import {useRouter} from 'next/router'
 import LoginCard from '../../components/AccountLogin/LoginCard'
 import LoginLayout from '../../components/layouts/LoginLayout'
-import {Role} from '../../models/User'
 import {ROUTES_ACCOUNT, ROUTES_HOME, ROUTES_LOGIN} from '../../constants/routes'
 import {useForm} from 'react-hook-form'
 import FormInput from '../../components/Form/components/FormInput'
-import {fetchSetUser} from '../../fetchers/auth'
 import handleError from '../../utils/dataHandling/handleError'
-import {useAuth} from '../../utils/AuthContext'
+import {useSupabaseAuth} from '../../utils/SupabaseAuthContext'
+import {getSupabaseClient} from '../../utils/supabase/client'
 import {useEffect} from 'react'
 
 interface FormData {
@@ -20,7 +19,7 @@ interface FormData {
 const Setup = () => {
   const router = useRouter()
   const theme = useTheme()
-  const {user} = useAuth()
+  const {user, logout: supabaseLogout} = useSupabaseAuth()
   const {t} = useTranslation()
 
   const {
@@ -32,23 +31,28 @@ const Setup = () => {
 
   useEffect(() => {
     reset(user ?? {})
-  }, [reset,user])
+  }, [reset, user])
 
   const logout = async () => {
-    await (await import('../../fetchers/auth')).fetchLogout()
+    await supabaseLogout()
     await router.push(ROUTES_LOGIN)
   }
 
   const onSubmit = async (data: FormData) => {
     if (!user) return await router.push(ROUTES_HOME)
 
-    try {
-      const {firstName, lastName} = data
-      await fetchSetUser(user.firebase, firstName, lastName, undefined, Role.USER)
-      await router.push(ROUTES_ACCOUNT)
-    } catch (e) {
-      handleError(e, t('account:setup_account_error_generic'))
+    const {firstName, lastName} = data
+    const {error} = await getSupabaseClient()
+      .from('profiles')
+      .update({first_name: firstName, last_name: lastName})
+      .eq('id', user.id)
+
+    if (error) {
+      handleError(error, t('account:setup_account_error_generic'))
+      return
     }
+
+    await router.push(ROUTES_ACCOUNT)
   }
 
   return (

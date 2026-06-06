@@ -5,10 +5,10 @@ import {useForm} from 'react-hook-form'
 import {ROUTES_SETUP} from '../../constants/routes'
 import {emailRegex} from '../../utils/dataHandling/validators'
 import FormInput from '../Form/components/FormInput'
-import {fetchCreateAccountWEmail} from '../../fetchers/auth'
 import handleError from '../../utils/dataHandling/handleError'
 import FormInputPassword from '../Form/components/FormPasswordInput'
 import {useEffect} from 'react'
+import {getSupabaseClient} from '../../utils/supabase/client'
 
 interface Props {
   email: string
@@ -36,17 +36,24 @@ const CreateEmailStep = ({email, onBack}: Props) => {
 
   const onSubmit = async (data: FormData) => {
     const {email, password} = data
+    const {error} = await getSupabaseClient().auth.signUp({email, password})
 
-    try {
-      await fetchCreateAccountWEmail(email, password)
-      await router.push(ROUTES_SETUP)
-    } catch (e: any) {
-      if (e.code === 'auth/email-already-in-use') {
-        handleError(e, t('account:create_account_error_exists'))
-      } else {
-        handleError(e, t('account:create_account_error_generic'))
-      }
+    if (error) {
+      // GoTrue surfaces "user already registered" as a 422 with that
+      // exact phrase; everything else is generic.
+      const isDuplicate = /already (registered|exists)/i.test(error.message)
+      handleError(
+        error,
+        t(
+          isDuplicate
+            ? 'account:create_account_error_exists'
+            : 'account:create_account_error_generic'
+        )
+      )
+      return
     }
+
+    await router.push(ROUTES_SETUP)
   }
 
   return (
