@@ -60,32 +60,39 @@ create trigger on_auth_user_created
 
 ------------------------------------------------------------------
 -- faqs  (replaces Firestore `faqData`)
+--
+-- Column names follow the existing Zod model (Faq.ts) so the fetcher
+-- can map snake_case directly without renaming on the UI side.
 ------------------------------------------------------------------
 
 create table if not exists public.faqs (
-  id           uuid primary key default gen_random_uuid(),
-  question     text not null,
-  answer       text not null,
-  order_index  integer not null default 0,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now()
+  id              uuid primary key default gen_random_uuid(),
+  question_en     text not null,
+  answer_en       text not null,
+  category_en     text not null,
+  category_order  integer not null default 0,
+  question_order  integer not null default 0,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
 );
 
-create index if not exists faqs_order_idx on public.faqs (order_index);
+create index if not exists faqs_order_idx
+  on public.faqs (category_order, question_order);
 
 ------------------------------------------------------------------
 -- team_members  (replaces Firestore `teamMember`)
 ------------------------------------------------------------------
 
 create table if not exists public.team_members (
-  id           uuid primary key default gen_random_uuid(),
-  name         text not null,
-  role_title   text,
-  photo_url    text,
-  bio          text,
-  order_index  integer not null default 0,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now()
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  title_en      text not null,
+  desc_en       text not null default '',
+  group_name    text not null default '',
+  picture       text not null default '',
+  order_index   integer not null default 0,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
 );
 
 create index if not exists team_members_order_idx on public.team_members (order_index);
@@ -98,8 +105,7 @@ create table if not exists public.contact_submissions (
   id           uuid primary key default gen_random_uuid(),
   name         text not null,
   email        text not null,
-  subject      text,
-  body         text not null,
+  message      text not null,
   status       text not null default 'new',
   created_at   timestamptz not null default now()
 );
