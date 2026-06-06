@@ -13,20 +13,14 @@ import {singleElementProvider} from '@coteries/utils/provider'
 import {z} from 'zod'
 import {getSupabaseAdmin, verifyAccessToken} from '../utils/supabase/admin'
 
-// AuthHandler now validates Supabase access tokens. The client still
-// presents the token in `x-firebase-appcheck` (legacy header name kept
-// to avoid touching every fetch call in one go — phase 7 renames it).
-// We also accept the standard `authorization: bearer <token>` because
-// any new caller will use that.
+// AuthHandler validates a Supabase access token sent as
+// `Authorization: Bearer <token>` by every authenticated client call.
 const AuthRequest = transformReq(async req => {
-  const headerToken =
-    (req.headers['x-firebase-appcheck'] as string | undefined) ||
-    extractBearer(req.headers['authorization'] as string | undefined)
-
-  if (!headerToken) throw new UnauthorizedError()
+  const token = extractBearer(req.headers['authorization'] as string | undefined)
+  if (!token) throw new UnauthorizedError()
 
   try {
-    const user = await verifyAccessToken(headerToken)
+    const user = await verifyAccessToken(token)
     return wrapRequest(req, {user, userId: user.id})
   } catch (err) {
     console.error('auth: token verification failed', err)

@@ -4,7 +4,7 @@ import {useForm} from 'react-hook-form'
 import {emailRegex} from '../../utils/dataHandling/validators'
 import FormInput from '../Form/components/FormInput'
 import FormInputPassword from '../Form/components/FormPasswordInput'
-import {useSupabaseAuth} from '../../utils/SupabaseAuthContext'
+import {useAuth} from '../../utils/AuthContext'
 
 interface Props {
   onBack: () => void
@@ -18,7 +18,7 @@ interface FormData {
 const LoginEmailLogin = ({onBack}: Props) => {
   const {t} = useTranslation()
 
-  const {loginWithEmail} = useSupabaseAuth()
+  const {loginWithEmail} = useAuth()
 
   const {
     register,

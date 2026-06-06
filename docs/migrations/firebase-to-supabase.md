@@ -119,7 +119,7 @@ between phases — Firebase and Supabase coexist until phase 6.
 | 8 | ✅ Migrate `faq.server.ts`, `teamMembers.server` | server-side selects against Postgres                                     |
 | 9 | ✅ Migrate `contactFetchers.ts`               | client insert via supabase, RLS allows anonymous insert                    |
 | 10| ✅ Remove `firebase`, `firebase-admin` deps   | `package.json`, `package-lock.json`, drop `utils/firebase/`                |
-| 11| Cleanup `firestore.rules`, env, dead consts   | Delete `firestore.rules`, `DB_COL_*` constants, Firebase env vars          |
+| 11| ✅ Cleanup `firestore.rules`, env, dead consts | Delete `firestore.rules`, `DB_COL_*` constants, Firebase env vars         |
 
 ## Per-file checklist
 

@@ -7,7 +7,7 @@ import {ROUTES_ACCOUNT, ROUTES_HOME, ROUTES_LOGIN} from '../../constants/routes'
 import {useForm} from 'react-hook-form'
 import FormInput from '../../components/Form/components/FormInput'
 import handleError from '../../utils/dataHandling/handleError'
-import {useSupabaseAuth} from '../../utils/SupabaseAuthContext'
+import {useAuth} from '../../utils/AuthContext'
 import {getSupabaseClient} from '../../utils/supabase/client'
 import {useEffect} from 'react'
 
@@ -19,7 +19,7 @@ interface FormData {
 const Setup = () => {
   const router = useRouter()
   const theme = useTheme()
-  const {user, logout: supabaseLogout} = useSupabaseAuth()
+  const {user, logout: authLogout} = useAuth()
   const {t} = useTranslation()
 
   const {
@@ -34,7 +34,7 @@ const Setup = () => {
   }, [reset, user])
 
   const logout = async () => {
-    await supabaseLogout()
+    await authLogout()
     await router.push(ROUTES_LOGIN)
   }
 

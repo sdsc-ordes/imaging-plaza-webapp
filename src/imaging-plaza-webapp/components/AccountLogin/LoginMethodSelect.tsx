@@ -3,7 +3,7 @@ import useTranslation from 'next-translate/useTranslation'
 import Envelope from '../Icons/solid/Envelope.svg'
 import Google from '../Icons/brand/Google.svg'
 import Github from '../Icons/brand/Github.svg'
-import {useSupabaseAuth} from '../../utils/SupabaseAuthContext'
+import {useAuth} from '../../utils/AuthContext'
 
 interface Props {
   onEmail: () => void
@@ -12,7 +12,7 @@ interface Props {
 const LoginMethodSelect = ({onEmail}: Props) => {
   const {t} = useTranslation()
 
-  const {isLoading, loginWithGoogle, loginWithGitHub} = useSupabaseAuth()
+  const {isLoading, loginWithGoogle, loginWithGitHub} = useAuth()
 
   const login = async () => {
     await loginWithGoogle()
