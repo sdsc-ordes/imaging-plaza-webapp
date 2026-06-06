@@ -30,7 +30,9 @@ const Burger = () => {
 
   const renderUser = () => (
     <>
-      <MenuItem onClick={() => push(ROUTES_ACCOUNT)}>{user && user.firebase.displayName}</MenuItem>
+      <MenuItem onClick={() => push(ROUTES_ACCOUNT)}>
+        {user && `${user.firstName} ${user.lastName}`.trim()}
+      </MenuItem>
       <MenuItem onClick={fetchLogout}>{t('common:sign_out')}</MenuItem>
     </>
   )

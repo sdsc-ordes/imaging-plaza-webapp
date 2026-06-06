@@ -1,8 +1,8 @@
-import {type User as FirebaseUser} from 'firebase/auth'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import useTranslation from 'next-translate/useTranslation'
-import {useRouter} from 'next/router'
-import {createContext, type ReactNode, useState, useContext, useEffect} from 'react'
-import {ROUTES_ACCOUNT, ROUTES_HOME} from '../constants/routes'
+import { useRouter } from 'next/router'
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
+import { ROUTES_ACCOUNT, ROUTES_HOME } from '../constants/routes'
 import {
   fetchLoginWEmail,
   fetchLoginWithGitHub,
@@ -10,15 +10,19 @@ import {
   fetchLogout,
   subscribeToAuthChange,
 } from '../fetchers/auth'
-import {User} from '../models/User'
+import { User } from '../models/User'
 import handleError from './dataHandling/handleError'
 
 interface Props {
   children: ReactNode
 }
 
-export type AuthUser = (User & {firebase: FirebaseUser}) | null
-interface contextProps {
+// Underlying auth provider is now Supabase. The `.supabase` field is the
+// raw GoTrue user (app_metadata, providers, etc.) for the handful of
+// components that need it. The User fields cover everything else.
+export type AuthUser = (User & { supabase: SupabaseUser }) | null
+
+interface ContextProps {
   user: AuthUser
   isLoading: boolean
   loginWithEmail: (email: string, password: string) => void
@@ -27,7 +31,7 @@ interface contextProps {
   logout: () => void
 }
 
-const AuthContext = createContext<contextProps>({
+const AuthContext = createContext<ContextProps>({
   user: null,
   isLoading: true,
   loginWithEmail: () => {},
@@ -36,70 +40,60 @@ const AuthContext = createContext<contextProps>({
   logout: () => {},
 })
 
-export const useAuth = () => {
-  return useContext(AuthContext)
-}
+export const useAuth = () => useContext(AuthContext)
 
-export const AuthProvider = ({children}: Props) => {
+export const AuthProvider = ({ children }: Props) => {
   const router = useRouter()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [user, setUser] = useState<AuthUser>(null)
 
   useEffect(() => {
     setIsLoading(true)
-
-    subscribeToAuthChange((user, firebase) => {
-      if (user) {
-        setUser({...user, firebase: firebase!})
+    const unsubscribe = subscribeToAuthChange((u, su) => {
+      if (u && su) {
+        setUser({ ...u, supabase: su })
+      } else {
+        setUser(null)
       }
-
       setIsLoading(false)
     })
+    return () => unsubscribe()
   }, [])
 
-  const postLogin = async (fbu: FirebaseUser) => {
+  const postLogin = async () => {
     await router.push(ROUTES_ACCOUNT)
   }
 
   const loginWithGoogle = async () => {
     try {
       setIsLoading(true)
-      const {user} = await fetchLoginWithGoogle()
-      postLogin(user)
+      await fetchLoginWithGoogle()
+      // OAuth redirects away; no router.push needed (and it'd race).
     } catch (e: any) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        handleError(e, t('common:login_error_generic'))
-      }
+      handleError(e, t('common:login_error_generic'))
     }
   }
 
   const loginWithGitHub = async () => {
     try {
       setIsLoading(true)
-      const {user} = await fetchLoginWithGitHub()
-      postLogin(user)
+      await fetchLoginWithGitHub()
     } catch (e: any) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        handleError(e, t('common:login_error_generic'))
-      }
+      handleError(e, t('common:login_error_generic'))
     }
   }
 
   const loginWithEmail = async (email: string, password: string) => {
     try {
       setIsLoading(true)
-      const {user} = await fetchLoginWEmail(email, password)
-      postLogin(user)
+      await fetchLoginWEmail(email, password)
+      await postLogin()
     } catch (e: any) {
-      if (e.code === 'auth/user-not-found') {
-        handleError(e, t('account:login_error_not_found'))
-      } else if (e.code === 'auth/wrong-password') {
-        handleError(e, t('account:login_error_password'))
-      } else {
-        handleError(e, t('account:login_error_generic'))
-      }
+      // GoTrue returns "Invalid login credentials" for either unknown
+      // email or wrong password; surface a single generic message.
+      handleError(e, t('account:login_error_generic'))
     }
   }
 
@@ -109,13 +103,6 @@ export const AuthProvider = ({children}: Props) => {
     await fetchLogout()
   }
 
-  const value = {
-    user,
-    isLoading,
-    loginWithEmail,
-    loginWithGoogle,
-    loginWithGitHub,
-    logout,
-  }
+  const value = { user, isLoading, loginWithEmail, loginWithGoogle, loginWithGitHub, logout }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -1,104 +1,128 @@
-import {
-  createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateEmail,
-  updateProfile,
-} from 'firebase/auth'
-import {doc, getDoc, onSnapshot, setDoc} from 'firebase/firestore'
-import {DB_COL_USER} from '../constants/dbCollections'
-import {FirebaseUser, Role, User, createUserForFirestore} from '../models/User'
-import {db} from '../utils/firebase/firebase'
-import {auth, githubProvider, googleProvider} from '../utils/firebase/firebaseAuth'
+// Supabase-backed implementation that preserves the public signatures the
+// rest of the codebase imports from this file. After phase 10 the import
+// of `firebase/auth` and `firebase/firestore` from any caller is removed;
+// until then, this file is the bridge.
 
-export const fetchCheckEmail = async (email: string) => {
-  return (await fetchSignInMethodsForEmail(auth, email)).length > 0
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { Role, type User } from '../models/User'
+import { getSupabaseClient } from '../utils/supabase/client'
+
+const profileToUser = (row: {
+  id: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  role: Role
+  bookmarked_software: string[] | null
+  own_softwares: string[] | null
+}): User => ({
+  id: row.id,
+  email: row.email,
+  firstName: row.first_name ?? '',
+  lastName: row.last_name ?? '',
+  role: row.role,
+  bookmarked_software: row.bookmarked_software ?? [],
+  own_softwares: row.own_softwares ?? [],
+})
+
+const hydrateUser = async (userId: string): Promise<User | null> => {
+  const { data, error } = await getSupabaseClient()
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+  if (error || !data) return null
+  return profileToUser(data)
 }
+
+// GoTrue intentionally hides whether an email is registered (avoids
+// account-enumeration). Keep the export so callers don't break; always
+// return false so the create-account flow proceeds to the password step,
+// where signup surfaces the real "already registered" error.
+export const fetchCheckEmail = async (_email: string): Promise<boolean> => false
+
+// Same reasoning. Always answer "password" so legacy provider-aware
+// branches in the UI keep working.
+export const fetchCheckEmailProvider = async (_email: string): Promise<string> => 'password'
 
 export const sendPasswordReset = async (email: string) => {
-  return sendPasswordResetEmail(auth, email)
-}
-
-export const fetchCheckEmailProvider = async (email: string) => {
-  return (await fetchSignInMethodsForEmail(auth, email)).pop()
+  const { error } = await getSupabaseClient().auth.resetPasswordForEmail(email)
+  if (error) throw error
 }
 
 export const fetchCreateAccountWEmail = async (email: string, password: string) => {
-  return await createUserWithEmailAndPassword(auth, email, password)
+  const { data, error } = await getSupabaseClient().auth.signUp({ email, password })
+  if (error) throw error
+  return { user: data.user }
 }
 
 export const fetchLoginWEmail = async (email: string, password: string) => {
-  return signInWithEmailAndPassword(auth, email, password)
+  const { data, error } = await getSupabaseClient().auth.signInWithPassword({ email, password })
+  if (error) throw error
+  return { user: data.user }
 }
 
+// Supabase OAuth is redirect-based: the call kicks the browser to the
+// provider and returns immediately. There is no Firebase-style popup that
+// resolves with a user. Callers that awaited a `user` get null here; the
+// real session lands during the next page load and is picked up by
+// subscribeToAuthChange below.
 export const fetchLoginWithGoogle = async () => {
-  return await signInWithPopup(auth, googleProvider)
+  const { error } = await getSupabaseClient().auth.signInWithOAuth({ provider: 'google' })
+  if (error) throw error
+  return { user: null }
 }
 
 export const fetchLoginWithGitHub = async () => {
-  return await signInWithPopup(auth, githubProvider)
+  const { error } = await getSupabaseClient().auth.signInWithOAuth({ provider: 'github' })
+  if (error) throw error
+  return { user: null }
 }
 
 export const fetchLogout = async () => {
-  await signOut(auth)
+  await getSupabaseClient().auth.signOut()
 }
 
 export const subscribeToAuthChange = (
-  callback: (user: User | null, firebaseUser?: FirebaseUser) => void
+  callback: (user: User | null, supabaseUser?: SupabaseUser) => void
 ) => {
-  return onAuthStateChanged(auth, async fbu => {
-    if (fbu) {
-      const user = await getFromFirebase(fbu)
-      callback(user, fbu)
-      subscribeToUser(fbu, callback)
-    } else {
-      callback(null)
-    }
+  const supabase = getSupabaseClient()
+
+  const emit = async (su: SupabaseUser | null) => {
+    if (!su) return callback(null)
+    const user = await hydrateUser(su.id)
+    callback(user, su)
+  }
+
+  // Initial hydration so subscribers see the current session immediately,
+  // not just on the next state change.
+  void supabase.auth.getSession().then(({ data }) => emit(data.session?.user ?? null))
+
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    void emit(session?.user ?? null)
   })
-}
 
-const addToFirebase = (fbu: FirebaseUser) => {
-  const [id, user] = createUserForFirestore(fbu)
-  const dbRef = doc(db, DB_COL_USER, id)
-  setDoc(dbRef, user) // will retrigger onSnapshot
-}
-
-const getFromFirebase = async (fbu: FirebaseUser) => {
-  // Error Firestore Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
-  const user = await getDoc(doc(db, DB_COL_USER, fbu.uid))
-
-  return {id: fbu.uid, ...user.data()} as User
-}
-
-const subscribeToUser = (
-  firebaseUser: FirebaseUser,
-  callback: (user: User, firebaseUser?: FirebaseUser) => void
-) => {
-  const dbRef = doc(db, DB_COL_USER, firebaseUser.uid)
-  return onSnapshot(dbRef, doc => {
-    if (doc.exists()) {
-      callback({id: doc.id, ...(doc.data() as Omit<User, 'id'>)}, firebaseUser)
-    } else {
-      addToFirebase(firebaseUser)
-    }
-  })
+  return () => sub.subscription.unsubscribe()
 }
 
 export const fetchSetUser = async (
-  firebaseUser: FirebaseUser,
+  user: User,
   firstName: string,
   lastName: string,
   email?: string,
   role?: Role
 ) => {
-  if (email) {
-    await updateEmail(firebaseUser, email)
+  const supabase = getSupabaseClient()
+
+  if (email && email !== user.email) {
+    const { error } = await supabase.auth.updateUser({ email })
+    if (error) throw error
   }
-  await updateProfile(firebaseUser, {displayName: `${firstName} ${lastName}`})
-  const payload = Object.assign({}, {firstName, lastName}, email && {email}, role && {role})
-  await setDoc(doc(db, 'users', firebaseUser.uid), payload, {merge: true})
+
+  const payload: Record<string, unknown> = { first_name: firstName, last_name: lastName }
+  if (email) payload.email = email
+  if (role) payload.role = role
+
+  const { error } = await supabase.from('profiles').update(payload).eq('id', user.id)
+  if (error) throw error
 }

@@ -53,7 +53,7 @@ const EditProfileModal = ({isOpen, onClose, providerIsEmail}: Props) => {
     if (!user) return
     const showToast = await import('../../utils/showToast').then(mod => mod.showToast)
     try {
-      await fetchSetUser(user.firebase, values.firstName, values.lastName, values.email)
+      await fetchSetUser(user, values.firstName, values.lastName, values.email)
       showToast(t('common:generic_success'), 'success')
       onClose()
     } catch (e: any) {

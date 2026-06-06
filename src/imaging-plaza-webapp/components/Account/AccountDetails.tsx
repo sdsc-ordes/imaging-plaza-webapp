@@ -54,9 +54,11 @@ const AccountDetails = () => {
 
   const {user} = useAuth()
 
+  // GoTrue reports the auth provider on the supabase user's
+  // app_metadata.provider field ('email', 'google', 'github', ...).
   let providerIsEmail = false
   if (user) {
-    providerIsEmail = user.firebase.providerData[0].providerId === 'password'
+    providerIsEmail = user.supabase.app_metadata?.provider === 'email'
   }
 
   const {

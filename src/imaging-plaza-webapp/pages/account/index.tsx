@@ -61,7 +61,13 @@ const Index = () => {
 
   return (
     <MainLayout restrictedType={[Role.ADMIN, Role.USER]}>
-      <PageHeader title={user?.firebase?.displayName ?? t('common:my_account')} />
+      <PageHeader
+        title={
+          user && (user.firstName || user.lastName)
+            ? `${user.firstName} ${user.lastName}`.trim()
+            : t('common:my_account')
+        }
+      />
       <Stack direction={{base: 'column', md: 'row'}} spacing={8} mb={20}>
         <VStack
           w={{base: 'full', md: 80}}

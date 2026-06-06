@@ -8,7 +8,7 @@ const UserDetails = () => {
   return (
     <Stack direction={{base: 'column', md: 'row'}} spacing={6} w='full' alignItems='center'>
       <Image
-        src={user?.firebase?.photoURL ?? '/icons/user_image.svg'}
+        src='/icons/user_image.svg'
         width={102}
         height={102}
         alt='user'
