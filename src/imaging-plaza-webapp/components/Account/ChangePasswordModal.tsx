@@ -1,10 +1,8 @@
 import {Button, HStack, ModalBody, ModalHeader, Text, VStack} from '@chakra-ui/react'
-import {sendPasswordResetEmail} from 'firebase/auth'
-
 import useTranslation from 'next-translate/useTranslation'
 import {useState} from 'react'
+import {sendPasswordReset} from '../../fetchers/auth'
 import {useAuth} from '../../utils/AuthContext'
-import {auth} from '../../utils/firebase/firebaseAuth'
 import ModalContainer from '../Modal/ModalContainer'
 
 interface Props {
@@ -22,7 +20,7 @@ const ChangePasswordModal = ({isOpen, onClose}: Props) => {
     setIsLoading(true)
     const showToast = await import('../../utils/showToast').then(mod => mod.showToast)
     try {
-      await sendPasswordResetEmail(auth, user.email!)
+      await sendPasswordReset(user.email!)
       showToast(t('account:change_password_email_success_toast_description'), 'success')
     } catch (e: any) {
       showToast(t('account:change_password_email_error_toast_description'), 'error')
