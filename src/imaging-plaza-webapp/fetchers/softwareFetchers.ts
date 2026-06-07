@@ -15,28 +15,39 @@ export const searchSoftwareInGraph = async (query: string, filters?: Filter[]) =
   )
 }
 
-// Firestore's onSnapshot pushed updates live. Postgres realtime would
-// need the supabase/realtime service, which the dev stack does not run.
-// For now do a one-shot fetch from public.profiles and return a no-op
-// unsubscribe. Consumers re-render bookmarks on every page transition
-// anyway; missed updates show up on the next mount.
+// Firestore's onSnapshot pushed updates live; the Supabase equivalent
+// would be supabase.channel('profiles').on('postgres_changes', ...).
+// That needs the supabase/realtime service, which crashes on IPv6-less
+// hosts (this dev VM included — see /imaging-plaza/supabase/docker-
+// compose.yml for the back-story). Fall back to polling every 15 s and
+// return a real unsubscribe that clears the interval.
+const POLL_INTERVAL_MS = 15_000
+
 export const subscribeToUserSoftwareListWithGraph = (
   userId: string,
   setSoftwareList: (softs: string[]) => void,
   setBookmarkedList: (softs: string[]) => void
 ) => {
-  void getSupabaseClient()
-    .from('profiles')
-    .select('own_softwares, bookmarked_software')
-    .eq('id', userId)
-    .single<{own_softwares: string[] | null; bookmarked_software: string[] | null}>()
-    .then(({data}) => {
-      if (!data) return
-      setSoftwareList(data.own_softwares ?? [])
-      setBookmarkedList(data.bookmarked_software ?? [])
-    })
+  let cancelled = false
 
-  return () => {}
+  const refresh = async () => {
+    const {data} = await getSupabaseClient()
+      .from('profiles')
+      .select('own_softwares, bookmarked_software')
+      .eq('id', userId)
+      .single<{own_softwares: string[] | null; bookmarked_software: string[] | null}>()
+    if (cancelled || !data) return
+    setSoftwareList(data.own_softwares ?? [])
+    setBookmarkedList(data.bookmarked_software ?? [])
+  }
+
+  void refresh()
+  const interval = setInterval(() => void refresh(), POLL_INTERVAL_MS)
+
+  return () => {
+    cancelled = true
+    clearInterval(interval)
+  }
 }
 
 // DELETE PLACEHOLDER

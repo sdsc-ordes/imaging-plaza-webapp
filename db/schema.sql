@@ -199,3 +199,17 @@ create policy contact_submissions_anon_insert on public.contact_submissions
 drop policy if exists contact_submissions_admin_read on public.contact_submissions;
 create policy contact_submissions_admin_read on public.contact_submissions
   for select using (public.is_admin());
+
+------------------------------------------------------------------
+-- Realtime publication
+--
+-- Tables the Supabase Realtime service should stream change events
+-- for. RLS still scopes what each subscriber sees, so a logged-in
+-- user only ever receives pushes for their own profile row.
+------------------------------------------------------------------
+
+do $$
+begin
+  alter publication supabase_realtime add table public.profiles;
+exception when duplicate_object then null;
+end $$;
